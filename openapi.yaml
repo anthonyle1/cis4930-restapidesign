@@ -1,0 +1,108 @@
+
+openapi: 3.0.3
+
+info:
+  title: Movie Theater Selection
+  description: An API that is built to allow users to view and select available seats in a movie room.
+  version: 1.0.0
+
+paths:
+  /showtimes/{showtimeID}/available_seats:
+    get:
+          summary: retrieves available seats from the current showtime
+          parameters:
+          - name: showtimeID
+            in: path
+            required: true
+            description: Unique ID of the movie showtime
+            schema:
+              type: integer
+          
+          responses:
+            '200':
+              description: Successfully retrieved list of available seats.
+              content:
+                application/json:
+                  schema:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        seatId:
+                          type: string
+                        available:
+                          type: boolean
+            '400':
+              description: Unable to retrieve list of available seats.
+  
+  /showtimes/{showtimeID}/seat/{seatID}/select:
+    post:
+          summary: select a seat for an existing movie showtime
+          parameters:
+            - name: showtimeID
+              in: path
+              required: true
+              description: Unique ID of the movie showtime
+              schema:
+                type: integer
+            - name: seatID
+              in: path
+              required: true
+              description: Seat selected by the customer
+              schema:
+                type: string
+          requestBody:
+            required: true
+            description: Customer information for the reservation
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    customerID:
+                      type: integer
+                      example: 25
+                  required:
+                    - customerID
+          responses:
+            '201':
+              description: Seat successfully selected
+            '404':
+              description: Showtime or seat not found, seat may be taken/occupied.
+  
+  /user/{customerID}/purchases/{showtimeID}/refund/{seatID}:
+      delete:
+            summary: refund a purchased movie ticket
+            description: |
+              allows a customer to request a refund for a purchased movie ticket. if successfully able
+              to refund the ticket, seat becomes available again!
+            parameters:
+              - name: customerID
+                in: path
+                required: true
+                description: Unique ID of the customer
+                schema:
+                  type: integer
+
+              - name: showtimeID
+                in: path
+                required: true
+                description: Unique ID of the movie showtime
+                schema:
+                  type: integer
+
+              - name: seatID
+                in: path
+                required: true
+                description: Seat associated with the ticket
+                schema:
+                  type: string
+                  example: A5
+
+            responses:
+              '200':
+                description: Ticket successfully refunded
+              '403':
+                description: Customer is not eligible for a refund
+              '404':
+                description: Ticket purchase not found
